@@ -1,0 +1,77 @@
+---
+title: "US Tilapia Imports"
+author: "Ruth Enriquez"
+date: "2022-08-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+library(dplyr)
+```
+
+Task 2
+
+-   Read in the data as `us_tilapia_imports`
+
+```{r}
+us_tilapia_imports <-read_csv(here::here("data", "us_tilapia_imports.csv"))
+```
+
+#Use pivot_longer() to reshape the data into long format (currently, the variable “year” is spread across multiple columns). Remember to store the output so you will be able to use the reshaped data this creates.
+
+#Check the class of the year column. What is it, and why do you think that’s the case? Then, coerce the year column to numeric (e.g. using mutate() and as.numeric() in combination)
+
+```{r}
+tilapia_df <- us_tilapia_imports |>
+  pivot_longer(cols = -country,
+             values_to = "imports",
+             names_to = "year") %>%
+  mutate(year = as.numeric(year))
+```
+
+#Use dplyr::group_by() %>% summarize() to find the total US tilapia imports by year, store as yearly_tilapia_tot
+
+```{r}
+yearly_tilapia_tot <- tilapia_df |>
+  dplyr::group_by(year) |>
+  summarize(total_imports =sum(imports, na.rm = TRUE))
+
+yearly_tilapia_tot
+```
+
+#Create a ggplot line graph of total US tilapia imports for all years in `yearly_tilapia_tot`.
+
+```{r}
+tilapia_import_gg <- ggplot(data = yearly_tilapia_tot, aes(x = year, y = total_imports))+
+  geom_line()+
+  labs(x = "Year", y = "Import")
+
+tilapia_import_gg
+```
+
+```{r}
+ggsave(plot = tilapia_import_gg, here::here("fig", "tilapia_import_gg.png"), width = 5, height = 6)
+```
+
+
+```{r}
+yearly_tilapia_sub <- tilapia_df |>
+ filter(country %in% c("Ecuador", "Honduras", "Costa Rica", "Mexico")) |>
+  na.omit(imports)
+
+yearly_tilapia_sub
+```
+
+```{r}
+tilapia_sub_gg <- ggplot(data = yearly_tilapia_sub, aes(x = year, y = imports, color= country))+
+  geom_line()+
+  labs(x = "Year", y = "Import")
+
+tilapia_sub_gg
+```
+
+

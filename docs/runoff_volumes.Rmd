@@ -1,0 +1,48 @@
+---
+title: "Runoff Volumes"
+author: "Ruth Enriquez"
+date: "2022-08-12"
+output: html_document
+---
+
+#Attach the tidyverse and here packages
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+```
+
+#Source your storm_runoff.R script so you are able to use the predict_runoff function in your .Rmd
+
+```{r}
+source(here::here("src", "storm_runoff.R"))
+```
+
+#In a code chunk in your runoff_volumes.Rmd, use your predict_runoff function to estimate stormwater volume for a watershed of 182 acres, over a range of estimates for the impervious fraction (from 0.6 to 0.8, by increments of 0.01). Note: you do not need to write a for loop here.
+
+#Bind your sequence of impervious fractions together with the resulting runoff volume calculated into a data frame
+
+```{r}
+impervious_fraction <- seq(from = 0.6, to = 0.8, by = 0.01)
+
+runoff_volumes <- predict_runoff(Ia = impervious_fraction, A = 182)
+
+runoff_df <- data.frame(impervious_fraction, runoff_volumes)
+```
+
+# Create a ggplot graph that has both dots and connecting lines (i.e., you’ll layer geom_point() and geom_line(). Update axis labels. Export a png of your graph to the figs folder using ggsave
+
+```{r}
+runoff_gg <- ggplot(data = runoff_df, aes(x = impervious_fraction, y = runoff_volumes))+
+  geom_point()+
+  geom_line()+
+  labs(x = "Imprevious Fraction", y = "Runoff Volumes c^3")
+```
+
+```{r}
+ggsave(plot = runoff_gg, here::here("fig", "runoff_gg.png"),
+       width = 5,
+       height = 6)
+```
+
